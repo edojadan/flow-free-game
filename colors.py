@@ -1,4 +1,3 @@
-# colors.py
 
 COLOR_MAP = {
     'a': (252, 13, 27),   # red

@@ -1,4 +1,3 @@
-# main.py
 import pygame
 import sys
 from screens import SplashScreen, MainMenuScreen, GameScreen, LevelCompletionScreen, ColorSchemeScreen

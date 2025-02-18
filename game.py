@@ -1,5 +1,3 @@
-# game.py
-
 import pygame
 from level_notation import parse_level
 
@@ -7,6 +5,12 @@ class Board:
     def __init__(self, level_data, cell_size=60):
         self.cell_size = cell_size
         self.height, self.width, self.grid = parse_level(level_data)
+
+        print("Expected grid:", self.height, "rows x", self.width, "cols")
+        print("Parsed grid has", len(self.grid), "rows")
+        for idx, row in enumerate(self.grid):
+            print("Row", idx, "length:", len(row))
+
 
         # Find endpoints: color -> list of endpoint cells [(r1,c1), (r2,c2)]
         self.endpoints = {}

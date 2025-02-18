@@ -1,4 +1,3 @@
-# screens.py
 import pygame
 from button import Button
 from game import Board
