@@ -4,6 +4,7 @@ from game import Board
 from levels import get_level
 from puzzle_generator import generate_puzzle
 from colors import COLOR_MAP
+from puzzle_generator import make_puzzle_direct
 
 
 # Global list to store previously generated puzzle data
@@ -59,13 +60,10 @@ class GenerateLevelScreen:
             print("No puzzle to preview yet.")
 
     def generate_new_puzzle(self):
-        puzzle_data = generate_puzzle(self.selected_size, self.selected_size, self.selected_flows,
-                                      max_endpoint_tries=200000000, max_solver_attempts=50000000000)
-        if puzzle_data is None:
-            print("Could not generate a single-solution puzzle. Try again.")
-            return
+        puzzle_data = make_puzzle_direct(self.selected_size, self.selected_size, self.selected_flows)
+        # puzzle_data = [height, width, rle]
         generated_puzzles.append(puzzle_data)
-        print("Puzzle generated:", puzzle_data)
+        print("Generated puzzle:", puzzle_data)
 
     def load_next_puzzle(self):
         # Cycle among stored puzzles
@@ -200,13 +198,13 @@ class GameScreen(BaseScreen):
             level_data = get_level(0)
         self.board = Board(level_data, cell_size=60)
         # Add control buttons
-        self.buttons.append(Button(rect=(10, 400, 100, 40),
+        self.buttons.append(Button(rect=(10, 450, 100, 40),
                                    text="Back",
                                    callback=lambda: self.switch_screen_callback("main_menu")))
-        self.buttons.append(Button(rect=(120, 400, 100, 40),
+        self.buttons.append(Button(rect=(120, 450, 100, 40),
                                    text="Undo",
                                    callback=self.undo))
-        self.buttons.append(Button(rect=(230, 400, 100, 40),
+        self.buttons.append(Button(rect=(230, 450, 100, 40),
                                    text="Restart",
                                    callback=self.restart))
     

@@ -2,7 +2,130 @@ import random
 from collections import deque
 from colors import COLOR_MAP
 
-def generate_puzzle(height, width, flow_count, max_endpoint_tries=200, max_solver_attempts=50):
+def make_spanning_tree(height, width):
+    directions = [(-1,0),(1,0),(0,-1),(0,1)]
+    tree = {}
+    for r in range(height):
+        for c in range(width):
+            tree[(r,c)] = []
+    visited = set()
+    stack = [(0,0)]
+    visited.add((0,0))
+    
+    while stack:
+        current = stack[-1]
+        (r, c) = current
+        neighbors = []
+        for dr, dc in directions:
+            nr, nc = r + dr, c + dc
+            if 0 <= nr < height and 0 <= nc < width:
+                if (nr,nc) not in visited:
+                    neighbors.append((nr,nc))
+        if not neighbors:
+            stack.pop()
+        else:
+            nxt = random.choice(neighbors)
+            visited.add(nxt)
+            stack.append(nxt)
+            tree[current].append(nxt)
+            tree[nxt].append(current)
+    return tree
+
+def partition_tree_into_paths(tree, height, width, flow_count):
+    all_cells = list(tree.keys())
+    random.shuffle(all_cells)
+    
+    # Create one big walk that visits every cell exactly once
+    walk = []
+    used = set()
+    current = all_cells[0]
+    walk.append(current)
+    used.add(current)
+    for i in range(1, len(all_cells)):
+        nxt = all_cells[i]
+        path_segment = find_path_in_tree(tree, current, nxt)
+        # Add path_segment (except the first node to avoid duplication)
+        for node in path_segment[1:]:
+            if node not in used:
+                walk.append(node)
+                used.add(node)
+        current = nxt
+
+    # Now slice this walk into flow_count segments
+    paths = []
+    total_nodes = len(walk)
+    segment_size = total_nodes // flow_count
+    remainder = total_nodes % flow_count
+    idx = 0
+    for f in range(flow_count):
+        extra = 1 if f < remainder else 0
+        size = segment_size + extra
+        segment_nodes = walk[idx : idx + size]
+        idx += size
+        paths.append(segment_nodes)
+    return paths
+
+def find_path_in_tree(tree, start, goal):
+    stack = [(start, [start])]
+    visited = {start}
+    while stack:
+        current, path = stack.pop()
+        if current == goal:
+            return path
+        for neighbor in tree[current]:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                stack.append((neighbor, path + [neighbor]))
+    return []
+
+def endpoints_to_rle(endpoints, height, width):
+    layout = [['.' for _ in range(width)] for _ in range(height)]
+    # Reverse lookup won't be needed if we use the color letter directly
+    for color, (ep1, ep2) in endpoints.items():
+        r1,c1 = ep1
+        r2,c2 = ep2
+        layout[r1][c1] = color
+        layout[r2][c2] = color
+
+    flattened = []
+    for r in range(height):
+        for c in range(width):
+            flattened.append(layout[r][c])
+
+    rle = []
+    dot_count = 0
+    for ch in flattened:
+        if ch == '.':
+            dot_count += 1
+        else:
+            if dot_count > 0:
+                rle.append(str(dot_count))
+                dot_count = 0
+            rle.append(ch)
+    if dot_count > 0:
+        rle.append(str(dot_count))
+    return ''.join(rle)
+
+def make_puzzle_direct(height, width, flow_count):
+    tree = make_spanning_tree(height, width)
+    paths = partition_tree_into_paths(tree, height, width, flow_count)
+
+    # Pick 'flow_count' color letters
+    color_letters = list(COLOR_MAP.keys())
+    random.shuffle(color_letters)
+    color_letters = color_letters[:flow_count]
+
+    # endpoints[color] = [start_of_segment, end_of_segment]
+    endpoints = {}
+    for i, path in enumerate(paths):
+        color = color_letters[i]
+        endpoints[color] = [path[0], path[-1]]
+
+    # build RLE
+    rle = endpoints_to_rle(endpoints, height, width)
+    return [height, width, rle]
+
+def generate_puzzle(height, width, flow_count, max_endpoint_tries=200000000000, max_solver_attempts=5000000000):
     """
     Generate a single-solution puzzle on a (height x width) grid with 'flow_count' flows.
     - We place endpoints randomly up to 'max_endpoint_tries' times.
