@@ -1,5 +1,3 @@
-# game.py
-
 import pygame
 from level_notation import parse_level
 
@@ -7,23 +5,46 @@ class Board:
     def __init__(self, level_data, cell_size=60):
         self.cell_size = cell_size
         self.height, self.width, self.grid = parse_level(level_data)
-        # current_path: list of (row, col) cells
+
+        # Find endpoints: color -> list of endpoint cells [(r1,c1), (r2,c2)]
+        self.endpoints = {}
+        for r in range(self.height):
+            for c in range(self.width):
+                color = self.grid[r][c]
+                if color is not None:
+                    if color not in self.endpoints:
+                        self.endpoints[color] = []
+                    self.endpoints[color].append((r, c))
+
+        # paths[color] = list of (row, col) describing final path from one endpoint to the other
+        # or None if that color not yet solved
+        self.paths = {color: None for color in self.endpoints}
+
+        # cell_owner[r][c] = which color currently occupies that cell’s path, or None if unused
+        self.cell_owner = [[None for _ in range(self.width)] for _ in range(self.height)]
+
+        # For user‐in‐progress path
         self.current_path = []
         self.current_color = None
         self.mouse_down = False
 
+        self.solved = False  # Will be True once puzzle is solved
+
     def handle_event(self, event):
-        """Handle a single Pygame event."""
+        """Handle Pygame events."""
+        if self.solved:
+            return  # If puzzle is solved, ignore further input
+
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:  # Left click
+            if event.button == 1:  # left click
                 self.mouse_down = True
-                row_col = self._cell_from_mouse()
-                if row_col is not None:
-                    r, c = row_col
+                cell = self._cell_from_mouse()
+                if cell is not None:
+                    r, c = cell
                     color = self.grid[r][c]
-                    # If it's an endpoint cell, start a path
+                    # Only start a path if it's an endpoint cell
                     if color is not None:
-                        self.current_path = [(r, c)]
+                        self.current_path = [cell]
                         self.current_color = color
                     else:
                         self.current_path = []
@@ -31,59 +52,119 @@ class Board:
 
         elif event.type == pygame.MOUSEMOTION:
             if self.mouse_down and self.current_color is not None:
-                row_col = self._cell_from_mouse()
-                if row_col is not None:
-                    self._try_add_cell(row_col)
+                cell = self._cell_from_mouse()
+                if cell is not None:
+                    self._try_add_cell(cell)
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
                 self.mouse_down = False
-                # Here you might check if the path ends on another endpoint of the same color
-                # For now, we simply stop drawing the path
+                if self.current_color is not None and len(self.current_path) > 1:
+                    # Check if path is valid: starts at endpoints[color][0] or [1], ends at the other
+                    start = self.current_path[0]
+                    end = self.current_path[-1]
+                    ep = self.endpoints[self.current_color]
+                    # We want a path that starts at ep[0] and ends at ep[1] (or vice versa)
+                    if (start in ep and end in ep and start != end):
+                        # This path is valid: store it
+                        self.paths[self.current_color] = list(self.current_path)
+                    else:
+                        # Invalid path => remove it from cell_owner
+                        for (r, c) in self.current_path:
+                            if self.cell_owner[r][c] == self.current_color:
+                                self.cell_owner[r][c] = None
+
                 self.current_path = []
                 self.current_color = None
 
+                # Check if puzzle is solved
+                self._check_solved()
+
     def update(self, dt):
-        """Update game state if needed. dt is time since last frame in seconds."""
         pass
 
     def draw(self, screen):
-        """Draw the grid and current path onto the screen."""
         screen.fill((0, 0, 0))  # black background
-        # Draw cells
+
+        # Draw grid lines + endpoints
         for r in range(self.height):
             for c in range(self.width):
                 x = c * self.cell_size
                 y = r * self.cell_size
                 rect = pygame.Rect(x, y, self.cell_size, self.cell_size)
-                # Draw border
-                pygame.draw.rect(screen, (160, 160, 160), rect, width=1)
-                # Draw endpoint if color is not None
-                color = self.grid[r][c]
-                if color is not None:
-                    # draw a circle inside the cell
+                pygame.draw.rect(screen, (200, 200, 200), rect, width=1)
+
+                # If it's an endpoint in the original grid, draw a circle
+                if self.grid[r][c] is not None:
+                    color = self.grid[r][c]
                     center = (x + self.cell_size // 2, y + self.cell_size // 2)
-                    radius = self.cell_size // 2 - 5
+                    radius = self.cell_size // 2 - 4
                     pygame.draw.circle(screen, color, center, radius)
 
-        # Draw current path
-        if self.current_path and self.current_color:
-            path_points = []
-            for (r, c) in self.current_path:
-                px = c * self.cell_size + self.cell_size / 2
-                py = r * self.cell_size + self.cell_size / 2
-                path_points.append((px, py))
+        # Draw final paths (for each color)
+        for color, path_cells in self.paths.items():
+            if path_cells:
+                self._draw_path(screen, path_cells, color)
 
-            # Draw thick lines between consecutive points
-            if len(path_points) > 1:
-                pygame.draw.lines(screen, self.current_color, False, path_points, width=8)
+        # Draw the current, in‐progress path
+        if self.current_path and self.current_color:
+            self._draw_path(screen, self.current_path, self.current_color, in_progress=True)
+
+        if self.solved:
+            # Draw a "solved" message
+            font = pygame.font.SysFont(None, 48)
+            text_surf = font.render("Puzzle solved!", True, (255, 255, 0))
+            screen.blit(text_surf, (20, 20))
+
+    def _draw_path(self, screen, path_cells, color, in_progress=False):
+        # Convert cell coords to pixel coords
+        points = []
+        for (r, c) in path_cells:
+            x = c * self.cell_size + self.cell_size / 2
+            y = r * self.cell_size + self.cell_size / 2
+            points.append((x, y))
+        thickness = 8 if not in_progress else 6
+        if len(points) > 1:
+            pygame.draw.lines(screen, color, False, points, thickness)
+        else:
+            # Single cell => draw small circle
+            (px, py) = points[0]
+            pygame.draw.circle(screen, color, (px, py), thickness)
+
+    def _try_add_cell(self, cell):
+        """Attempt to add 'cell' to current path, handle collisions, adjacency, etc."""
+        if not self.current_path:
+            return
+        last_cell = self.current_path[-1]
+        if cell == last_cell:
+            return
+
+        # Check adjacency
+        if abs(cell[0] - last_cell[0]) + abs(cell[1] - last_cell[1]) == 1:
+            r, c = cell
+            # If this cell is occupied by a different color, remove that color's path
+            owner = self.cell_owner[r][c]
+            if owner is not None and owner != self.current_color:
+                # Remove that path
+                other_path = self.paths[owner]
+                if other_path:
+                    for (rr, cc) in other_path:
+                        self.cell_owner[rr][cc] = None
+                    self.paths[owner] = None
+
+            # If we've already visited this cell in our path, backtrack
+            if cell in self.current_path:
+                idx = self.current_path.index(cell)
+                self.current_path = self.current_path[:idx+1]
             else:
-                # If just one cell in path, draw a smaller circle
-                (px, py) = path_points[0]
-                pygame.draw.circle(screen, self.current_color, (px, py), 8)
+                self.current_path.append(cell)
+
+            # Mark ownership
+            for (rr, cc) in self.current_path:
+                self.cell_owner[rr][cc] = self.current_color
 
     def _cell_from_mouse(self):
-        """Returns (row, col) of the cell under the current mouse position, or None if out of bounds."""
+        """Returns (row, col) under mouse or None if out of bounds."""
         x, y = pygame.mouse.get_pos()
         col = x // self.cell_size
         row = y // self.cell_size
@@ -91,17 +172,18 @@ class Board:
             return (row, col)
         return None
 
-    def _try_add_cell(self, row_col):
-        """Attempt to add a new cell to the current path if it's adjacent to the last cell."""
-        if not self.current_path:
-            return
-        last_cell = self.current_path[-1]
-        if row_col != last_cell:
-            # Check adjacency
-            if abs(row_col[0] - last_cell[0]) + abs(row_col[1] - last_cell[1]) == 1:
-                # If we've already visited it in this path, backtrack or do nothing
-                if row_col in self.current_path:
-                    idx = self.current_path.index(row_col)
-                    self.current_path = self.current_path[:idx+1]
-                else:
-                    self.current_path.append(row_col)
+    def _check_solved(self):
+        """Set self.solved = True if all colors have valid paths and entire board is filled."""
+        # 1) All colors must have a path
+        for color, path in self.paths.items():
+            if not path:
+                return  # Not solved yet
+
+        # 2) Every cell must be occupied by some color’s path
+        for r in range(self.height):
+            for c in range(self.width):
+                if self.cell_owner[r][c] is None:
+                    return  # Found an unused cell => not solved
+
+        self.solved = True
+        print("Puzzle solved!")
