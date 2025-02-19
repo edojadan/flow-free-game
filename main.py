@@ -12,7 +12,7 @@ def apply_scheme_callback(scheme):
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((400, 500))
+    screen = pygame.display.set_mode((700, 700))
     pygame.display.set_caption("Flow Free Clone")
     
     current_screen = None
@@ -31,6 +31,9 @@ def main():
         elif screen_name == "color_scheme":
             # Pass the apply_scheme_callback so that scheme changes take effect instantly.
             current_screen = ColorSchemeScreen(switch_screen, apply_scheme_callback)
+        elif screen_name == "generate_level":
+            from screens import GenerateLevelScreen
+            current_screen = GenerateLevelScreen(switch_screen_callback=switch_screen)
     
     switch_screen("splash")
 

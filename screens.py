@@ -2,6 +2,137 @@ import pygame
 from button import Button
 from game import Board
 from levels import get_level
+from puzzle_generator import generate_puzzle
+from colors import COLOR_MAP
+
+
+# Global list to store previously generated puzzle data
+generated_puzzles = []
+generated_puzzle_index = 0  # which puzzle in the list we're on
+
+class GenerateLevelScreen:
+    def __init__(self, switch_screen_callback):
+        self.switch_screen_callback = switch_screen_callback
+        self.buttons = []
+        self.font = pygame.font.SysFont(None, 32)
+        self.selected_size = 6
+        self.selected_flows = 1
+
+        # Variables to keep track of user selections
+        self.selected_size = 6
+        self.selected_flows = 1
+
+        screen_rect = pygame.display.get_surface().get_rect()
+        mid_x = screen_rect.centerx
+
+        # Buttons
+        self.buttons.append(Button(
+            rect=(mid_x - 100, 280, 200, 40),
+            text="Preview",
+            callback=self.preview_puzzle
+        ))
+        self.buttons.append(Button(
+            rect=(mid_x - 100, 330, 200, 40),
+            text="New Puzzle",
+            callback=self.generate_new_puzzle
+        ))
+        self.buttons.append(Button(
+            rect=(mid_x - 100, 380, 200, 40),
+            text="Next Puzzle",
+            callback=self.load_next_puzzle
+        ))
+        self.buttons.append(Button(
+            rect=(mid_x - 100, 430, 200, 40),
+            text="Back",
+            callback=lambda: self.switch_screen_callback("main_menu")
+        ))
+
+    def preview_puzzle(self):
+        # If we have at least one puzzle stored, display a solved preview
+        if generated_puzzles:
+            puzzle_data = generated_puzzles[-1]  # last generated
+            # Switch to a special preview screen or create a pop-up
+            # For demonstration, let's just jump to the GameScreen but mark it solved forcibly
+            # or you can create a new "PreviewScreen"
+            self.switch_screen_callback("game", extra=puzzle_data)
+        else:
+            print("No puzzle to preview yet.")
+
+    def generate_new_puzzle(self):
+        puzzle_data = generate_puzzle(self.selected_size, self.selected_size, self.selected_flows,
+                                      max_endpoint_tries=200000000, max_solver_attempts=50000000000)
+        if puzzle_data is None:
+            print("Could not generate a single-solution puzzle. Try again.")
+            return
+        generated_puzzles.append(puzzle_data)
+        print("Puzzle generated:", puzzle_data)
+
+    def load_next_puzzle(self):
+        # Cycle among stored puzzles
+        global generated_puzzle_index
+        if not generated_puzzles:
+            print("No puzzles generated yet.")
+            return
+        generated_puzzle_index = (generated_puzzle_index + 1) % len(generated_puzzles)
+        puzzle = generated_puzzles[generated_puzzle_index]
+        self.switch_screen_callback("game", extra=puzzle)
+
+    def handle_event(self, event):
+        # Capture user input for puzzle size and flow count
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                # Increase puzzle size
+                if self.selected_size < 12:
+                    self.selected_size += 1
+                    # Make sure flows <= selected_size
+                    if self.selected_flows > self.selected_size:
+                        self.selected_flows = self.selected_size
+            elif event.key == pygame.K_DOWN:
+                # Decrease puzzle size
+                if self.selected_size > 6:
+                    self.selected_size -= 1
+                    # Make sure flows <= selected_size
+                    if self.selected_flows > self.selected_size:
+                        self.selected_flows = self.selected_size
+            elif event.key == pygame.K_RIGHT:
+                # Increase flows
+                if self.selected_flows < self.selected_size:
+                    self.selected_flows += 1
+            elif event.key == pygame.K_LEFT:
+                # Decrease flows
+                if self.selected_flows > 1:
+                    self.selected_flows -= 1
+
+        # Pass button events
+        for btn in self.buttons:
+            btn.handle_event(event)
+
+    def update(self, dt):
+        pass
+
+    def draw(self, surface):
+        surface.fill((20, 20, 20))
+        # Title
+        title_font = pygame.font.SysFont(None, 48)
+        title = title_font.render("Generate Level (Beta)", True, (255, 255, 255))
+        surface.blit(title, (50, 50))
+
+        # Instructions
+        instructions = [
+            "Use UP/DOWN to select size (6 to 12).",
+            "Use LEFT/RIGHT to select flows (1 to size).",
+            f"Current size = {self.selected_size}x{self.selected_size}",
+            f"Current flows = {self.selected_flows}",
+        ]
+        y = 120
+        for line in instructions:
+            text_surf = self.font.render(line, True, (200, 200, 200))
+            surface.blit(text_surf, (50, y))
+            y += 30
+
+        # Draw buttons
+        for btn in self.buttons:
+            btn.draw(surface)
 
 class BaseScreen:
     def __init__(self):
@@ -27,7 +158,7 @@ class SplashScreen(BaseScreen):
 
     def update(self, dt):
         self.time_elapsed += dt
-        if self.time_elapsed > 2:  # show splash for 2 seconds
+        if self.time_elapsed > 1:  # show splash for 2 seconds
             self.switch_screen_callback("main_menu")
 
     def draw(self, surface):
@@ -42,6 +173,9 @@ class MainMenuScreen(BaseScreen):
         self.switch_screen_callback = switch_screen_callback
         screen_rect = pygame.display.get_surface().get_rect()
         mid_x = screen_rect.centerx
+        self.buttons.append(Button(rect=(mid_x - 100, 400, 420, 50),
+                                   text="Generate Level beta test",
+                                   callback=lambda: self.switch_screen_callback("generate_level")))
         self.buttons.append(Button(rect=(mid_x-100, 200, 200, 50),
                                    text="Play",
                                    callback=lambda: self.switch_screen_callback("game")))
