@@ -66,13 +66,13 @@ class GameScreen(BaseScreen):
             level_data = get_level(0)
         self.board = Board(level_data, cell_size=60)
         # Add control buttons
-        self.buttons.append(Button(rect=(10, 10, 100, 40),
+        self.buttons.append(Button(rect=(10, 400, 100, 40),
                                    text="Back",
                                    callback=lambda: self.switch_screen_callback("main_menu")))
-        self.buttons.append(Button(rect=(120, 10, 100, 40),
+        self.buttons.append(Button(rect=(120, 400, 100, 40),
                                    text="Undo",
                                    callback=self.undo))
-        self.buttons.append(Button(rect=(230, 10, 100, 40),
+        self.buttons.append(Button(rect=(230, 400, 100, 40),
                                    text="Restart",
                                    callback=self.restart))
     
@@ -230,3 +230,4 @@ class ColorSchemeScreen(BaseScreen):
         rect = text.get_rect(center=(surface.get_width() // 2, 80))
         surface.blit(text, rect)
         super().draw(surface)
+

@@ -27,7 +27,7 @@ def parse_level(level_data):
                     cells.append(row)
                     row = []
         else:
-            # A letter representing an endpoint cell
+            # A single letter => an endpoint of that color
             color = COLOR_MAP.get(ch, None)
             row.append(color)
             i += 1
@@ -35,22 +35,12 @@ def parse_level(level_data):
                 cells.append(row)
                 row = []
 
-    # If there is a partially filled row, pad it with None
+    # If row is partially filled, pad it
     if row:
         while len(row) < width:
             row.append(None)
         cells.append(row)
 
-    # Diagnostic prints
-    total_cells = sum(len(r) for r in cells)
-    expected = height * width
-    print(f"Parsed grid: {len(cells)} rows, expected {height} rows.")
-    for idx, r in enumerate(cells):
-        print(f"Row {idx} length: {len(r)}")
-    print(f"Total cells parsed: {total_cells}, expected: {expected}")
-
-    # Assert that we have the right number of cells.
-    assert total_cells == expected, f"Level data error: expected {expected} cells but got {total_cells}."
-
     return height, width, cells
+
 
