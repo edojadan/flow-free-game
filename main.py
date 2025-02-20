@@ -12,7 +12,7 @@ def apply_scheme_callback(scheme):
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((700, 700))
+    screen = pygame.display.set_mode((800, 600), pygame.RESIZABLE)
     pygame.display.set_caption("Flow Free Clone")
     
     current_screen = None
@@ -40,10 +40,15 @@ def main():
     clock = pygame.time.Clock()
     running = True
     while running:
-        dt = clock.tick(30) / 1000.0  # ~30 FPS
+        dt = clock.tick(30)/1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.VIDEORESIZE:
+                new_w, new_h = event.w, event.h
+                screen = pygame.display.set_mode((new_w, new_h), pygame.RESIZABLE)
+                if current_screen:
+                    current_screen.handle_resize(new_w, new_h)
             else:
                 if current_screen:
                     current_screen.handle_event(event)
@@ -51,9 +56,9 @@ def main():
         if current_screen:
             current_screen.update(dt)
             current_screen.draw(screen)
-        
+
         pygame.display.flip()
-    
+
     pygame.quit()
     sys.exit()
 

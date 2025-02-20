@@ -193,24 +193,35 @@ class GameScreen(BaseScreen):
     def __init__(self, switch_screen_callback, level_data=None):
         super().__init__()
         self.switch_screen_callback = switch_screen_callback
+        self.buttons = []
+    
         # Load a level; if none is provided, use default from levels.py
         if level_data is None:
             level_data = get_level(0)
         self.board = Board(level_data, cell_size=60)
-        # Add control buttons
-        self.buttons.append(Button(rect=(10, 450, 100, 40),
-                                   text="Back",
-                                   callback=lambda: self.switch_screen_callback("main_menu")))
-        self.buttons.append(Button(rect=(120, 450, 100, 40),
-                                   text="Undo",
-                                   callback=self.undo))
-        self.buttons.append(Button(rect=(230, 450, 100, 40),
-                                   text="Restart",
-                                   callback=self.restart))
+        
+        # We'll create the Button objects, but hold an identifier for each
+        self.btn_back = Button(rect=(10,450,100,40), text="Back", callback=lambda: self.switch_screen_callback("main_menu"))
+        self.btn_restart = Button(rect=(230, 450,100,40), text="Restart", callback=self.restart)
+
+        self.buttons.extend([self.btn_back, self.btn_restart])
+
+
+    def handle_resize(self, new_width, new_height):
+        """
+        Called when the window is resized; reposition everything accordingly.
+        """
+        # Suppose you want to place the buttons at the bottom, spaced evenly:
+        margin_bottom = 20
+        button_width = 100
+        button_height = 40
+        
+        # e.g. place them horizontally spaced at x=10,120,230, pinned near the bottom
+        self.btn_back.rect = pygame.Rect(10, new_height - button_height - margin_bottom, button_width, button_height)
+        self.btn_restart.rect = pygame.Rect(230, new_height - button_height - margin_bottom, button_width, button_height)
+
+        new_width
     
-    def undo(self):
-        print("Undo pressed")
-        # Implement undo logic if desired
     
     def restart(self):
         print("Restart pressed")
