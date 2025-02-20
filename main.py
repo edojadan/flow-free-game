@@ -2,6 +2,7 @@ import pygame
 import sys
 from screens import SplashScreen, MainMenuScreen, GameScreen, LevelCompletionScreen, ColorSchemeScreen
 import colors  # our colors.py module
+from preview_screen import PreviewScreen
 
 def apply_scheme_callback(scheme):
     # Update the global color mapping in colors.py.
@@ -33,6 +34,11 @@ def main():
             current_screen = ColorSchemeScreen(switch_screen, apply_scheme_callback)
         elif screen_name == "generate_level":
             from screens import GenerateLevelScreen
+            current_screen = GenerateLevelScreen(switch_screen_callback=switch_screen)
+        elif screen_name == "preview_puzzle":
+            # puzzle_data is in 'extra'
+             current_screen = PreviewScreen(switch_screen_callback=switch_screen, puzzle_data=extra)
+        elif screen_name == "generate_level":
             current_screen = GenerateLevelScreen(switch_screen_callback=switch_screen)
     
     switch_screen("splash")

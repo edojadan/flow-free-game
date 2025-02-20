@@ -49,13 +49,9 @@ class GenerateLevelScreen:
         ))
 
     def preview_puzzle(self):
-        # If we have at least one puzzle stored, display a solved preview
         if generated_puzzles:
-            puzzle_data = generated_puzzles[-1]  # last generated
-            # Switch to a special preview screen or create a pop-up
-            # For demonstration, let's just jump to the GameScreen but mark it solved forcibly
-            # or you can create a new "PreviewScreen"
-            self.switch_screen_callback("game", extra=puzzle_data)
+            puzzle_data = generated_puzzles[-1]
+            self.switch_screen_callback("preview_puzzle", extra=puzzle_data)
         else:
             print("No puzzle to preview yet.")
 
