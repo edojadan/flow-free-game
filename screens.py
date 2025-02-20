@@ -279,69 +279,104 @@ class ColorSchemeScreen(BaseScreen):
         # Define 7 fruit-based color schemes as an example.
         self.schemes = {
             "Apple": {
-                'a': (255, 0, 0),
-                'b': (0, 255, 0),
-                'c': (0, 0, 255),
-                'd': (255, 255, 0),
-                'e': (255, 165, 0),
-                'f': (0, 255, 255),
-                'g': (255, 192, 203),
+                'a': (255,   0,   0),  # Bright red
+                'b': (153,   0,   0),  # Darker red
+                'c': (255, 102, 102),  # Light/pinkish red
+                'd': (204,  51,  51),  # Muted red
+                'e': (  0, 255,   0),  # Bright green
+                'f': (  0, 153,   0),  # Darker green
+                'g': (102, 255, 102),  # Pastel green
+                'h': ( 51, 204,  51),  # Medium‐bright green
+                'i': (255, 255,   0),  # Yellow
+                'j': (255, 128,   0),  # Orange
+                'k': (153,   0, 153),  # Purple
+                'l': (  0, 255, 255),  # Cyan
             },
             "Banana": {
-                'a': (240, 230, 140),
-                'b': (255, 255, 102),
-                'c': (255, 204, 51),
-                'd': (255, 255, 51),
-                'e': (255, 204, 102),
-                'f': (255, 255, 153),
-                'g': (255, 255, 102),
+                'a': (255, 255, 102),  # Pale yellow
+                'b': (255, 255,   0),  # Primary yellow
+                'c': (204, 204,   0),  # Duller yellow
+                'd': (255, 204,  51),  # Orange‐yellow
+                'e': (255, 229, 153),  # Very light banana
+                'f': (255, 255, 153),  # Light pastel yellow
+                'g': (248, 229, 145),  # Slightly warm banana
+                'h': (255, 230, 120),  # Peachy yellow
+                'i': (153, 204,  51),  # Yellow‐green
+                'j': (204, 255,   0),  # Lime‐ish
+                'k': (255, 153,   0),  # Deeper orange
+                'l': (255, 102,   0),  # Reddish orange
             },
             "Grape": {
-                'a': (128, 0, 128),
-                'b': (153, 50, 204),
-                'c': (186, 85, 211),
-                'd': (138, 43, 226),
-                'e': (147, 112, 219),
-                'f': (216, 191, 216),
-                'g': (221, 160, 221),
+                'a': (128,   0, 128),  # Classic purple
+                'b': (153,  50, 204),  # Medium purple
+                'c': (186,  85, 211),  # Orchid
+                'd': (147, 112, 219),  # Medium purple / pastel
+                'e': ( 75,   0, 130),  # Indigo
+                'f': (216, 191, 216),  # Thistle
+                'g': (238, 130, 238),  # Violet
+                'h': (221, 160, 221),  # Plum
+                'i': (255,   0, 255),  # Magenta
+                'j': (255, 192, 203),  # Pink
+                'k': (  0, 255, 255),  # Cyan for contrast
+                'l': (255, 255,   0),  # Bright yellow contrast
             },
             "Orange": {
-                'a': (255, 69, 0),
-                'b': (255, 140, 0),
-                'c': (255, 165, 0),
-                'd': (255, 99, 71),
-                'e': (255, 127, 80),
-                'f': (255, 160, 122),
-                'g': (255, 69, 0),
+                'a': (255,  69,   0),  # Orange red
+                'b': (255, 140,   0),  # Dark orange
+                'c': (255, 165,   0),  # Standard orange
+                'd': (255,  99,  71),  # Tomato
+                'e': (255, 127,  80),  # Coral
+                'f': (255, 160, 122),  # Light salmon
+                'g': (255, 200, 120),  # Lighter orange
+                'h': (255, 100,  50),  # Vibrant orange
+                'i': (128,   0,   0),  # Maroon
+                'j': (255,  20, 147),  # Hot pink for contrast
+                'k': (  0, 255, 255),  # Cyan for contrast
+                'l': (255, 255,   0),  # Bright yellow
             },
             "Lime": {
-                'a': (50, 205, 50),
-                'b': (124, 252, 0),
-                'c': (0, 255, 0),
-                'd': (173, 255, 47),
-                'e': (127, 255, 0),
-                'f': (0, 250, 154),
-                'g': (50, 205, 50),
+                'a': (  0, 255,   0),  # Bright green
+                'b': (124, 252,   0),  # Lawn green
+                'c': ( 50, 205,  50),  # Lime green
+                'd': (127, 255,   0),  # Chartreuse
+                'e': (173, 255,  47),  # Green‐yellow
+                'f': (102, 255, 102),  # Pastel green
+                'g': (  0, 153,   0),  # Dark green
+                'h': (152, 251, 152),  # Pale green
+                'i': (  0, 255, 255),  # Cyan accent
+                'j': (255, 255,   0),  # Yellow accent
+                'k': (255, 128,   0),  # Orange accent
+                'l': (153,   0, 153),  # Purple accent
             },
             "Cherry": {
-                'a': (222, 49, 99),
-                'b': (255, 105, 180),
-                'c': (255, 20, 147),
-                'd': (219, 112, 147),
-                'e': (255, 0, 127),
-                'f': (255, 20, 147),
-                'g': (222, 49, 99),
+                'a': (222,  49,  99),  # Raspberry
+                'b': (255, 105, 180),  # Hot pink
+                'c': (255,  20, 147),  # Deep pink
+                'd': (219, 112, 147),  # Pale violet red
+                'e': (255,   0, 127),  # Rose
+                'f': (229,  57,  53),  # Another bright red
+                'g': (153,   0,   0),  # Darker red
+                'h': (255, 102, 102),  # Light red/pink
+                'i': (255, 128,   0),  # Contrasting orange
+                'j': (255, 255,   0),  # Bright yellow
+                'k': (  0, 255, 255),  # Cyan
+                'l': (128,   0, 128),  # Purple
             },
             "Blueberry": {
-                'a': (0, 0, 139),
-                'b': (25, 25, 112),
-                'c': (65, 105, 225),
-                'd': (30, 144, 255),
-                'e': (100, 149, 237),
-                'f': (70, 130, 180),
-                'g': (0, 0, 139),
-            }
-        }
+                'a': (  0,   0, 139),  # Dark blue
+                'b': ( 25,  25, 112),  # Midnight blue
+                'c': ( 65, 105, 225),  # Royal blue
+                'd': ( 30, 144, 255),  # Dodger blue
+                'e': (100, 149, 237),  # Cornflower
+                'f': ( 70, 130, 180),  # Steel blue
+                'g': (  0,   0, 255),  # Pure blue
+                'h': (  0, 191, 255),  # Deep sky
+                'i': (  0, 255, 255),  # Cyan
+                'j': (138,  43, 226),  # Blue violet
+                'k': (143,   0, 255),  # Vivid purple
+                'l': (255, 255,   0),  # Yellow accent
+            },
+}
         # Create a button for each scheme.
         screen_rect = pygame.display.get_surface().get_rect()
         y = 150
