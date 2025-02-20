@@ -276,7 +276,6 @@ class ColorSchemeScreen(BaseScreen):
         super().__init__()
         self.switch_screen_callback = switch_screen_callback
         self.apply_scheme_callback = apply_scheme_callback
-        # Define 7 fruit-based color schemes as an example.
         self.schemes = {
             "Apple": {
                 'a': (255,   0,   0),  # Bright red
