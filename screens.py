@@ -2,9 +2,8 @@ import pygame
 from button import Button
 from game import Board
 from levels import get_level
-from puzzle_generator import generate_puzzle
 from colors import COLOR_MAP
-from puzzle_generator import make_puzzle_direct
+from level_generator import generate_level
 
 
 # Global list to store previously generated puzzle data
@@ -17,7 +16,7 @@ class GenerateLevelScreen:
         self.buttons = []
         self.font = pygame.font.SysFont(None, 32)
         self.selected_size = 6
-        self.selected_flows = 1
+        "self.selected_flows = 1"
 
         # Variables to keep track of user selections
         self.selected_size = 6
@@ -56,7 +55,7 @@ class GenerateLevelScreen:
             print("No puzzle to preview yet.")
 
     def generate_new_puzzle(self):
-        puzzle_data = make_puzzle_direct(self.selected_size, self.selected_size, self.selected_flows)
+        puzzle_data = generate_level(self.selected_size)
         # puzzle_data = [height, width, rle]
         generated_puzzles.append(puzzle_data)
         print("Generated puzzle:", puzzle_data)
@@ -88,14 +87,14 @@ class GenerateLevelScreen:
                     # Make sure flows <= selected_size
                     if self.selected_flows > self.selected_size:
                         self.selected_flows = self.selected_size
-            elif event.key == pygame.K_RIGHT:
+            """elif event.key == pygame.K_RIGHT:
                 # Increase flows
                 if self.selected_flows < self.selected_size:
                     self.selected_flows += 1
             elif event.key == pygame.K_LEFT:
                 # Decrease flows
                 if self.selected_flows > 1:
-                    self.selected_flows -= 1
+                    self.selected_flows -= 1"""
 
         # Pass button events
         for btn in self.buttons:
@@ -114,9 +113,8 @@ class GenerateLevelScreen:
         # Instructions
         instructions = [
             "Use UP/DOWN to select size (6 to 12).",
-            "Use LEFT/RIGHT to select flows (1 to size).",
             f"Current size = {self.selected_size}x{self.selected_size}",
-            f"Current flows = {self.selected_flows}",
+            #f"Current flows = {self.selected_flows}",
         ]
         y = 120
         for line in instructions:
@@ -142,6 +140,9 @@ class BaseScreen:
     def handle_event(self, event):
         for btn in self.buttons:
             btn.handle_event(event)
+    def handle_resize(self, new_w, new_h):
+        # Default implementation (no operation)
+        pass
 
 class SplashScreen(BaseScreen):
     def __init__(self, switch_screen_callback):
@@ -167,7 +168,7 @@ class MainMenuScreen(BaseScreen):
         self.switch_screen_callback = switch_screen_callback
         screen_rect = pygame.display.get_surface().get_rect()
         mid_x = screen_rect.centerx
-        self.buttons.append(Button(rect=(mid_x - 100, 400, 420, 50),
+        self.buttons.append(Button(rect=(mid_x -170, 400, 420, 50),
                                    text="Generate Level beta test",
                                    callback=lambda: self.switch_screen_callback("generate_level")))
         self.buttons.append(Button(rect=(mid_x-100, 200, 200, 50),
@@ -175,6 +176,9 @@ class MainMenuScreen(BaseScreen):
                                    callback=lambda: self.switch_screen_callback("game")))
         self.buttons.append(Button(rect=(mid_x-100, 300, 200, 50),
                                    text="Color Schemes",
+                                   callback=lambda: self.switch_screen_callback("color_scheme")))
+        self.buttons.append(Button(rect=(mid_x-170, 500, 500, 50),
+                                   text="Previous levels beta test",
                                    callback=lambda: self.switch_screen_callback("color_scheme")))
     
     def draw(self, surface):

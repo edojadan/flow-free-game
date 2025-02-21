@@ -6,14 +6,13 @@ from preview_screen import PreviewScreen
 
 def apply_scheme_callback(scheme):
     # Update the global color mapping in colors.py.
-    # This assumes your game uses colors.COLOR_MAP during level parsing.
     colors.COLOR_MAP.clear()
     colors.COLOR_MAP.update(scheme)
     print("Applied color scheme:", scheme)
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((800, 600), pygame.RESIZABLE)
+    screen = pygame.display.set_mode((900, 700), pygame.RESIZABLE)
     pygame.display.set_caption("Flow Free Clone")
     
     current_screen = None
