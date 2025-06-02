@@ -9,7 +9,7 @@ A minimal Flow Free–style puzzle in Python **without** Tkinter, using **Pygame
 
 ## How to Play
 
-- A window will appear with a 6×5 grid.
+- A window will appear with a 6×5 grid
 - Some cells have colored circles (the endpoints).
 - Click (and hold) on one endpoint, then drag to adjacent cells to form a path.
 - Release the mouse to finalize your path. (This example does not yet store or verify the final path, but you can extend it.)
